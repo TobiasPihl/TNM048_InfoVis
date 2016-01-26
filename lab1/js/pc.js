@@ -11,6 +11,7 @@ function pc(){
     
     //initialize color scale
     //...
+	var color = d3.scale.category20();
     
     //initialize tooltip
     //...
@@ -37,17 +38,28 @@ function pc(){
 
         // Extract the list of dimensions and create a scale for each.
         //...
-		console.log(self.data.map(function(d) { return d}));
+		//console.log(self.data.map(function(d) { return d}));
         x.domain(dimensions = d3.keys(self.data[0]).filter(function(d) {
-            return [(y[d] = d3.scale.linear()
-                .domain(d3.extent([0, 100/*function(d2) { return d3.max(d, function(d3) { return +d2[d3]*1.1; })}*/]))
-                .range([height, 0]))];
+            
+			//console.log("d = " + d);
+			if(d != "Country")
+				return [(y[d] = d3.scale.linear()
+					.domain(d3.extent(self.data, function(d2) {return (+d2[d]);}))
+					.range([height, 0]))];
         }));
 
         draw();
     });
 
     function draw(){
+	
+		//initialize a color country object	
+        var cc = {};
+		
+		self.data.forEach(function(d){
+			cc[d["Country"]] = color(d["Country"]);
+		})
+	
         // Add grey background lines for context.
         background = svg.append("svg:g")
             .attr("class", "background")
@@ -55,8 +67,12 @@ function pc(){
             //add the data and append the path 
             //...
 			.data(self.data)
-			.enter().append("path")
+			.enter()
+			.append("path")
 			.attr("d", path)
+			
+			
+			
             .on("mousemove", function(d){})
             .on("mouseout", function(){});
 
@@ -67,9 +83,14 @@ function pc(){
             //add the data and append the path 
             //...
 			.data(self.data)
-			.enter().append("path")
+			.enter()
+			.append("path")
 			.attr("d",path)
-            .on("mousemove", function(){})
+			
+			//set color
+			.style({stroke: function(d){ return cc[d.Country]}, "stroke-width": "2px"})
+			
+            .on("mousemove", function(d){console.log("Whaddupp!?" + d["Country"])})
             .on("mouseout", function(){});
 
         // Add a group element for each dimension.
@@ -83,6 +104,10 @@ function pc(){
         g.append("svg:g")
             .attr("class", "axis")
             //add scale
+			.each(function (d) {
+				d3.select(this).call(axis.scale(y[d]).ticks(3));
+			})
+			
             .append("svg:text")
             .attr("text-anchor", "middle")
             .attr("y", -9)

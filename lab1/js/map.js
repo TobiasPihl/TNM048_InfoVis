@@ -1,5 +1,5 @@
 function map(){
-
+	
     var zoom = d3.behavior.zoom()
         .scaleExtent([1, 8])
         .on("zoom", move);
@@ -12,10 +12,11 @@ function map(){
 
     //initialize color scale
     //...
+	var color = d3.scale.category20();
     
     //initialize tooltip
     //...
-
+	
     var projection = d3.geo.mercator()
         .center([50, 60 ])
         .scale(250);
@@ -31,33 +32,43 @@ function map(){
     g = svg.append("g");
 
     // load data and draw the map
-    d3.json("data/se.topojson", function(error, world) {
-        console.log(world);
-        var countries = topojson.feature(world, world.objects.swe_mun).features;
+
+    d3.json("data/world-topo.json", function(error, world) {
+		var countries = topojson.feature(world, world.objects.countries).features;
         
         //load summary data
         //...
-
-        draw(countries);
-        
+		
+		d3.csv("data/OECD-better-life-index-hi.csv", function(error, data) {
+			draw(countries,data);
+		});
     });
-
+	
+	
+	
     function draw(countries,data)
     {
         var country = g.selectAll(".country").data(countries);
-
+		
         //initialize a color country object	
         var cc = {};
 		
-        //...
-
-        country.enter().insert("path")
+		data.forEach(function(d){
+			cc[d["Country"]] = color(d["Country"]);
+		})
+		
+		country.enter().insert("path")
             .attr("class", "country")
             .attr("d", path)
             .attr("id", function(d) { return d.id; })
             .attr("title", function(d) { return d.properties.name; })
             //country color
-            //...
+            
+
+			//.data(self.data)
+			//...
+			.style("fill", function(d){	return cc[d.properties.name]})
+			
             //tooltip
             .on("mousemove", function(d) {
                 //...
@@ -69,8 +80,8 @@ function map(){
             .on("click",  function(d) {
                 //...
             });
-
     }
+	
     
     //zoom and panning method
     function move() {

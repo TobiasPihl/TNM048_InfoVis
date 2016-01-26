@@ -11,7 +11,8 @@ function sp(){
 	
     //initialize color scale
     //...
-    
+	var color = d3.scale.category20();
+	
     //initialize tooltip
     //...
 
@@ -45,10 +46,10 @@ function sp(){
         //...
 		xString = "Household income";
 		yString = "Employment rate";
-		xMax =d3.max(self.data, function(d) { return +d[xString]*1.1; });
-		yMax =d3.max(self.data, function(d) { return +d["Employment rate"]*1.1; });
-		x.domain([0, xMax]);
-		y.domain([0, yMax]);
+		
+		x.domain(d3.extent(self.data, function(d) {return d[xString]}) /*[0, xMax]*/);
+		xAxis.ticks(5);
+		y.domain(d3.extent(self.data, function(d) {return d[yString]})   /*[0, yMax]*/);
 	
 	//console.log(self.data[1]["Household income"]);
 		
@@ -58,7 +59,13 @@ function sp(){
 
     function draw()
     {
-        
+		//initialize a color country object	
+        var cc = {};
+		
+		self.data.forEach(function(d){
+			cc[d["Country"]] = color(d["Country"]);
+		})
+	
         // Add x axis and title.
         svg.append("g")
             .attr("class", "x axis")
@@ -81,9 +88,15 @@ function sp(){
             .attr("transform", "rotate(-90)")
 			.attr("text-anchor", "end")
 			.style("font-size", "15px")
-            .attr("y", 6)
+            .attr("y", -40)
             .attr("dy", ".71em");
             
+		//Get min and max on the x & y scale
+		xMax = d3.max(self.data, function(d) { return +d[xString]; });
+		xMin = d3.min(self.data, function(d) { return +d[xString]; });
+		yMax = d3.max(self.data, function(d) { return +d[yString]; });
+		yMin = d3.min(self.data, function(d) { return +d[yString]; });
+		
         // Add the scatter dots.
         svg.selectAll(".dot")
             .data(self.data)
@@ -91,9 +104,12 @@ function sp(){
             .attr("class", "dot")
             //Define the x and y coordinate data values for the dots
             //...
-			.attr("cx", function(d) { return (width/xMax)*d[xString]; })
-			.attr("cy", function(d) { return height-(height/yMax)*d[yString]; })
-			.attr("r", 2)
+			.style("fill", function(d){	return cc[d.Country]})
+			
+			.attr("cx", function(d) { return (width/(xMax-xMin))*(d[xString]-xMin); })
+			.attr("cy", function(d) { return height-(height/(yMax-yMin))*(d[yString]-yMin); })
+			.attr("r", 4)
+			
             //tooltip
             .on("mousemove", function(d) {
                 //...    
