@@ -50,8 +50,6 @@ function sp(){
 		x.domain(d3.extent(self.data, function(d) {return d[xString]}) /*[0, xMax]*/);
 		xAxis.ticks(5);
 		y.domain(d3.extent(self.data, function(d) {return d[yString]})   /*[0, yMax]*/);
-	
-	//console.log(self.data[1]["Household income"]);
 		
         draw();
 
@@ -118,13 +116,26 @@ function sp(){
                 //...   
             })
             .on("click",  function(d) {
-                //...    
+                //... 
+                svg.selectAll(".dot").style("fill", function(d2) {
+				    if(d.Country == d2.Country)
+				    	return color(d["Country"]);
+				    return d3.rgb(255,255,255);
+				});  
+                pc1.selectLine(d);
             });
     }
 
     //method for selecting the dot from other components
     this.selectDot = function(value){
         //...
+        
+        svg.selectAll(".dot").style("fill", function(d) {
+            for(var i in value)
+            	if(d.Country == value[i])
+            		return color(d["Country"]);
+            return d3.rgb(255,255,255);
+    	});
     };
     
     //method for selecting features of other components

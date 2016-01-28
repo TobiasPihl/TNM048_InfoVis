@@ -15,6 +15,7 @@ function pc(){
     
     //initialize tooltip
     //...
+	var tooltip = [];
 
     var x = d3.scale.ordinal().rangePoints([0, width], 1),
         y = {};
@@ -52,7 +53,11 @@ function pc(){
     });
 
     function draw(){
-	
+		
+		//Declare tooltip object
+		self.data.forEach(function(d) {tooltip.push(d.Country)});
+		for(var i = 0; i < tooltip.length; i++)
+		
 		//initialize a color country object	
         var cc = {};
 		
@@ -90,7 +95,7 @@ function pc(){
 			//set color
 			.style({stroke: function(d){ return cc[d.Country]}, "stroke-width": "2px"})
 			
-            .on("mousemove", function(d){console.log("Whaddupp!?" + d["Country"])})
+            //.on("mousemove", function(d){console.log("Whaddupp!?" + d["Country"])})
             .on("mouseout", function(){});
 
         // Add a group element for each dimension.
@@ -129,18 +134,28 @@ function pc(){
 
     // Handles a brush event, toggling the display of foreground lines.
     function brush() {
+    	var markedObjects = [];
         var actives = dimensions.filter(function(p) { return !y[p].brush.empty(); }),
             extents = actives.map(function(p) { return y[p].brush.extent(); });
         foreground.style("display", function(d) {
             return actives.every(function(p, i) {
+            	if(extents[i][0] <= d[p] && d[p] <= extents[i][1])
+            		markedObjects.push(d.Country);
                 return extents[i][0] <= d[p] && d[p] <= extents[i][1];
             }) ? null : "none";
         });
+        sp1.selectDot(markedObjects);
     }
 
     //method for selecting the pololyne from other components	
     this.selectLine = function(value){
         //...
+        console.log(value);
+        foreground.style("display", function(d) { 
+        	if (d["Country"] == value["Country"])
+        		return null;
+        	return "none";
+        });
     };
     
     //method for selecting features of other components
