@@ -15,6 +15,19 @@ function sp(){
 	
     //initialize tooltip
     //...
+	
+	// Ex1: Simply add a small text beside over point
+	//var tooltip = d3.select("body")
+		// .append("div")
+		// .style("position", "absolute")
+		// .style("z-index", "10")
+		// .style("visibility", "hidden")
+		// .text( "Test" );
+		
+	// Ex2: A tooltip which has a window
+	var div = d3.select("body").append("div")	
+		.attr("class", "tooltip")				
+		.style("opacity", 0);
 
     var x = d3.scale.linear()
         .range([0, width]);
@@ -103,18 +116,44 @@ function sp(){
             //Define the x and y coordinate data values for the dots
             //...
 			.style("fill", function(d){	return cc[d.Country]})
-			
 			.attr("cx", function(d) { return (width/(xMax-xMin))*(d[xString]-xMin); })
 			.attr("cy", function(d) { return height-(height/(yMax-yMin))*(d[yString]-yMin); })
 			.attr("r", 4)
 			
-            //tooltip
-            .on("mousemove", function(d) {
-                //...    
-            })
-            .on("mouseout", function(d) {
-                //...   
-            })
+            // Ex1: tooltip mouse functions
+			// .on("mouseover", function(){/*###*/ console.log(self.data.County); return tooltip.style("visibility", "visible");})
+			// .on("mousemove", function(){return tooltip.style("top", (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+			// .on("mouseout", function(){return tooltip.style("visibility", "hidden");})
+			
+			// Ex2: tooltip mouse funtions
+			.on("mouseover", function(d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html( function(d2){
+				return (
+					d.Country + '<br>'
+					+ "Household income: " 				+ d["Household income"] + '<br>' 
+					+ "Employment rate: " 				+ d["Employment rate"] + '<br>' 
+					+ "Unemployment rate: " 			+ d["Unemployment rate"] + '<br>' 
+					+ "Quality of support network: " 	+ d["Quality of support network"] + '<br>' 
+					+ "Student skills: " 				+ d["Student skills"] + '<br>' 
+					+ "Water quality: " 				+ d["Water quality"] + '<br>' 
+					+ "Voter turnout: "					+ d["Voter turnout"] + '<br>' 
+					+ "Self-reported health: "			+ d["Self-reported health"] + '<br>' 
+					+ "Life satisfaction: "				+ d["Life satisfaction"]
+				);
+			})	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })					
+			.on("mouseout", function(d) {		
+				div.transition()		
+					.duration(500)		
+					.style("opacity", 0);	
+			})
+			
+			
             .on("click",  function(d) {
                 //... 
                 svg.selectAll(".dot").style("fill", function(d2) {

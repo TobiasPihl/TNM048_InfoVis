@@ -16,6 +16,11 @@ function pc(){
     //initialize tooltip
     //...
 	var tooltip = [];
+	
+	// Ex2: A tooltip which has a window
+	var div = d3.select("body").append("div")	
+		.attr("class", "tooltip")				
+		.style("opacity", 0);
 
     var x = d3.scale.ordinal().rangePoints([0, width], 1),
         y = {};
@@ -96,7 +101,35 @@ function pc(){
 			.style({stroke: function(d){ return cc[d.Country]}, "stroke-width": "2px"})
 			
             //.on("mousemove", function(d){console.log("Whaddupp!?" + d["Country"])})
-            .on("mouseout", function(){});
+            //.on("mouseout", function(){});
+			
+			// Ex2: tooltip mouse funtions
+			.on("mouseover", function(d) {		
+            div.transition()		
+                .duration(200)		
+                .style("opacity", .9);		
+            div	.html( function(d2){
+				return (
+					d.Country + '<br>'
+					+ "Household income: " 				+ d["Household income"] + '<br>' 
+					+ "Employment rate: " 				+ d["Employment rate"] + '<br>' 
+					+ "Unemployment rate: " 			+ d["Unemployment rate"] + '<br>' 
+					+ "Quality of support network: " 	+ d["Quality of support network"] + '<br>' 
+					+ "Student skills: " 				+ d["Student skills"] + '<br>' 
+					+ "Water quality: " 				+ d["Water quality"] + '<br>' 
+					+ "Voter turnout: "					+ d["Voter turnout"] + '<br>' 
+					+ "Self-reported health: "			+ d["Self-reported health"] + '<br>' 
+					+ "Life satisfaction: "				+ d["Life satisfaction"]
+				);
+			})	
+                .style("left", (d3.event.pageX) + "px")		
+                .style("top", (d3.event.pageY - 28) + "px");	
+            })					
+			.on("mouseout", function(d) {		
+				div.transition()		
+					.duration(500)		
+					.style("opacity", 0);	
+			})
 
         // Add a group element for each dimension.
         var g = svg.selectAll(".dimension")

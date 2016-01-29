@@ -62,10 +62,8 @@ function map(){
             .attr("d", path)
             .attr("id", function(d) { return d.id; })
             .attr("title", function(d) { return d.properties.name; })
-            //country color
             
-
-			//.data(self.data)
+			//country color
 			//...
 			.style("fill", function(d){	return cc[d.properties.name]})
 			
