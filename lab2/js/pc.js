@@ -25,6 +25,7 @@ function pc(){
 
     
     //d3.csv("data/testData1_400x3_2-clusters.csv", function(data) {
+   	//d3.csv("data/testData2_400x3_2-clusters.csv", function(data) {
     d3.csv("data/testData2_5600x5_x-clusters.csv", function(data) {
         // Extract the list of dimensions and create a scale for each.
         x.domain(dimensions = d3.keys(data[0]).filter(function(d) {
@@ -40,7 +41,7 @@ function pc(){
         
         self.data = data;
         
-        var k = 6;
+        var k = 4;
         var kmeansRes = kmeans(data,k);
         
         //initialize the cluster colors
@@ -51,7 +52,6 @@ function pc(){
     });
 
     function draw(kmeansRes, color){
-        
         // Add grey background lines for context.
         background = svg.append("svg:g")
             .attr("class", "background")
