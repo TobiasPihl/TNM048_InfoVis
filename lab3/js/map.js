@@ -42,6 +42,8 @@ function map(data) {
     //Formats the data in a feature collection trougth geoFormat()
     var geoData = {type: "FeatureCollection", features: geoFormat(data)};
 
+	console.log(geoData);
+	
     //Loads geo data
     d3.json("data/world-topo.json", function (error, world) {
         var countries = topojson.feature(world, world.objects.countries).features;
@@ -56,8 +58,20 @@ function map(data) {
     //Formats the data in a feature collection
     function geoFormat(array) {
         var data = [];
+		
         array.map(function (d, i) {
             //Complete the code
+			
+			data.push (
+				{
+					type: "Feature", 
+					geometry: { 
+						type : "Point", 
+						coordinates: [(d.lon), (d.lat)]
+					},
+					properties: _.clone(d),
+				}
+			);
         });
         return data;
     }
@@ -74,8 +88,11 @@ function map(data) {
                 .style("fill", "lightgray")
                 .style("stroke", "white");
 
-        //draw point        
-        var point //Complete the code
+		//draw point        
+		var point = g.append("path")
+			.datum(geoData)
+			.attr("d", path);
+
     };
 
     //Filters data points according to the specified magnitude
