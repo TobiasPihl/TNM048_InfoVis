@@ -117,5 +117,6 @@ function area(data) {
         focus.select(".x.axis").call(xAxis);
         //Complete the code
 		//???
+		map1.filterTime(x.domain());
     }
 }

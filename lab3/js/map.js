@@ -1,7 +1,7 @@
 function map(data) {
 
     var zoom = d3.behavior.zoom()
-            .scaleExtent([0.5, 8])
+            .scaleExtent([0.3, 8])
             .on("zoom", move);
 
     var mapDiv = $("#map");
@@ -39,14 +39,16 @@ function map(data) {
     //Creates a new geographic path generator and assing the projection        
     var path = d3.geo.path().projection(projection);
 
-    //Formats the data in a feature collection trougth geoFormat()
+    //Formats the data in a feature collection through geoFormat()
     var geoData = {type: "FeatureCollection", features: geoFormat(data)};
-
-	console.log(geoData);
-	
+    
+    
+    //Had to make countries variable global to be able to call draw() from the filterTime() function
+	var countries;
+    
     //Loads geo data
     d3.json("data/world-topo.json", function (error, world) {
-        var countries = topojson.feature(world, world.objects.countries).features;
+        countries = topojson.feature(world, world.objects.countries).features;
         draw(countries);
     });
 
@@ -88,21 +90,38 @@ function map(data) {
                 .style("fill", "lightgray")
                 .style("stroke", "white");
 
-		//draw point        
+		//draw point
 		var point = g.append("path")
+			.attr("class", "point")
 			.datum(geoData)
 			.attr("d", path);
-
     };
 
     //Filters data points according to the specified magnitude
     function filterMag(value) {
         //Complete the code
+        
+        //OBS: Inget samspel mellan filterMag och filterTime!
+        g.selectAll(".point").remove();
+        geoData = {type: "FeatureCollection", features: geoFormat(data.filter(function(d){
+        		if(d.mag > value) return 1;
+       		return 0;
+        }))};
+        draw(countries);
     }
     
     //Filters data points according to the specified time window
     this.filterTime = function (value) {
         //Complete the code
+        
+        //OBS: Inget samspel mellan filterMag och filterTime!
+ 		g.selectAll(".point").remove();
+        geoData = {type: "FeatureCollection", features: geoFormat(data.filter(function(d){
+        	var temp = format.parse(d.time);	
+        		if(temp > value[0] && temp < value[1]) return 1;
+       		return 0;
+        }))};
+        draw(countries);
     };
 
     //Calls k-means function and changes the color of the points  
