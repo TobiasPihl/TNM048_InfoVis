@@ -18,7 +18,8 @@ function map(data) {
         return format.parse(d.time);
     }));
 
-    var filterdData = data;
+    var filterMagData = data;
+    var filterTimeData = data;
 
     //Sets the colormap
     var colors = colorbrewer.Set3[10];
@@ -42,13 +43,11 @@ function map(data) {
     //Formats the data in a feature collection through geoFormat()
     var geoData = {type: "FeatureCollection", features: geoFormat(data)};
     
-    
-    //Had to make countries variable global to be able to call draw() from the filterTime() function
-	var countries;
+
     
     //Loads geo data
     d3.json("data/world-topo.json", function (error, world) {
-        countries = topojson.feature(world, world.objects.countries).features;
+        var countries = topojson.feature(world, world.objects.countries).features;
         draw(countries);
     });
 
@@ -99,29 +98,46 @@ function map(data) {
 
     //Filters data points according to the specified magnitude
     function filterMag(value) {
-        //Complete the code
-        
-        //OBS: Inget samspel mellan filterMag och filterTime!
-        g.selectAll(".point").remove();
-        geoData = {type: "FeatureCollection", features: geoFormat(data.filter(function(d){
-        		if(d.mag > value) return 1;
-       		return 0;
+
+        filterMagData = filterMagData.filter(function(d){
+                if(d.mag > value) return 1;
+            return 0;
+        });
+
+        geoData = {type: "FeatureCollection", features: geoFormat(filterTimeData.filter(function(d){
+                if(d.mag > value) return 1;
+            return 0;
         }))};
-        draw(countries);
+
+        //draw point
+        g.selectAll(".point").remove();
+        var point = g.append("path")
+            .attr("class", "point")
+            .datum(geoData)
+            .attr("d", path);
     }
     
     //Filters data points according to the specified time window
     this.filterTime = function (value) {
-        //Complete the code
-        
-        //OBS: Inget samspel mellan filterMag och filterTime!
- 		g.selectAll(".point").remove();
-        geoData = {type: "FeatureCollection", features: geoFormat(data.filter(function(d){
-        	var temp = format.parse(d.time);	
-        		if(temp > value[0] && temp < value[1]) return 1;
-       		return 0;
+
+        filterTimeData = filterTimeData.filter(function(d){
+            var temp = format.parse(d.time);
+                if(temp > value[0] && temp < value[1]) return 1;
+            return 0;
+        });
+
+        geoData = {type: "FeatureCollection", features: geoFormat(filterMagData.filter(function(d){
+            var temp = format.parse(d.time);
+                if(temp > value[0] && temp < value[1]) return 1;
+            return 0;
         }))};
-        draw(countries);
+        
+        //draw point
+        g.selectAll(".point").remove();
+        var point = g.append("path")
+            .attr("class", "point")
+            .datum(geoData)
+            .attr("d", path);
     };
 
     //Calls k-means function and changes the color of the points  
