@@ -99,7 +99,7 @@ function map(data) {
     //Filters data points according to the specified magnitude
     function filterMag(value) {
 
-        filterMagData = filterMagData.filter(function(d){
+        filterMagData = data.filter(function(d){
                 if(d.mag > value) return 1;
             return 0;
         });
@@ -120,7 +120,7 @@ function map(data) {
     //Filters data points according to the specified time window
     this.filterTime = function (value) {
 
-        filterTimeData = filterTimeData.filter(function(d){
+        filterTimeData = data.filter(function(d){
             var temp = format.parse(d.time);
                 if(temp > value[0] && temp < value[1]) return 1;
             return 0;
@@ -143,6 +143,9 @@ function map(data) {
     //Calls k-means function and changes the color of the points  
     this.cluster = function () {
         //Complete the code
+        var k = document.getElementById("k").value;
+        var tempData = kmeans(data, k);
+        console.log(tempData);
     };
 
     //Zoom and panning method
