@@ -18,8 +18,12 @@ function map(data) {
         return format.parse(d.time);
     }));
 
-    var filterMagData = data;
-    var filterTimeData = data;
+
+	var filterMagValue = 0;
+	var filterTimeValue = [0, 0];
+	var filterData = [];
+    //var filterMagData = [];
+    //var filterTimeData = [];
 
     //Sets the colormap
     var colors = colorbrewer.Set3[10];
@@ -61,8 +65,7 @@ function map(data) {
         var data = [];
 		
         array.map(function (d, i) {
-            //Complete the code
-			
+        	
 			data.push (
 				{
 					type: "Feature", 
@@ -90,62 +93,79 @@ function map(data) {
                 .style("stroke", "white");
 
 		//draw point
-		var point = g.append("path")
-			.attr("class", "point")
-			.datum(geoData)
-			.attr("d", path);
+		//var point = g.selectAll("path").data(geoData.features);
+        //point.enter()
+        //    .append("path")
+        //    .attr("class", "point")
+        //    .attr("d", path);
     };
 
     //Filters data points according to the specified magnitude
     function filterMag(value) {
-
-        filterMagData = data.filter(function(d){
-                if(d.mag > value) return 1;
+		filterMagValue = value;
+		
+        filterData = data.filter(function(d){
+        	var temp = format.parse(d.time);
+        	
+            if(d.mag > filterMagValue && temp > filterTimeValue[0] && temp < filterTimeValue[1]) 
+               	return 1;
             return 0;
         });
-
-        geoData = {type: "FeatureCollection", features: geoFormat(filterTimeData.filter(function(d){
-                if(d.mag > value) return 1;
-            return 0;
-        }))};
-
-        //draw point
-        g.selectAll(".point").remove();
-        var point = g.append("path")
-            .attr("class", "point")
-            .datum(geoData)
-            .attr("d", path);
-    }
-    
-    //Filters data points according to the specified time window
-    this.filterTime = function (value) {
-
-        filterTimeData = data.filter(function(d){
-            var temp = format.parse(d.time);
-                if(temp > value[0] && temp < value[1]) return 1;
-            return 0;
-        });
-
-        geoData = {type: "FeatureCollection", features: geoFormat(filterMagData.filter(function(d){
-            var temp = format.parse(d.time);
-                if(temp > value[0] && temp < value[1]) return 1;
-            return 0;
-        }))};
+		
+        geoData = {type: "FeatureCollection", features: geoFormat(filterData)};
         
         //draw point
         g.selectAll(".point").remove();
-        var point = g.append("path")
+        g.selectAll(".point").data(geoData.features)
+        	.enter()
+            .append("path")
             .attr("class", "point")
-            .datum(geoData)
+            .attr("d", path);
+    };
+    
+    //Filters data points according to the specified time window
+    this.filterTime = function (value) {
+		filterTimeValue = value;
+		
+        filterData = data.filter(function(d){
+        	var temp = format.parse(d.time);
+            if(d.mag > filterMagValue && temp > filterTimeValue[0] && temp < filterTimeValue[1]) 
+               	return 1;
+            return 0;
+        });
+
+        geoData = {type: "FeatureCollection", features: geoFormat(filterData)};
+
+		//draw point
+		g.selectAll(".point").remove();
+        g.selectAll(".point").data(geoData.features)
+        	.enter()
+            .append("path")
+            .attr("class", "point")
             .attr("d", path);
     };
 
     //Calls k-means function and changes the color of the points  
     this.cluster = function () {
-        //Complete the code
+
         var k = document.getElementById("k").value;
-        var tempData = kmeans(data, k);
-        console.log(tempData);
+		
+		//Fill tempData with the relevant dimensions for the clustering
+        tempData = [];
+        filterData.forEach(function(d, i) {
+        	tempData[i] = {};
+        	tempData[i].depth = d["depth"];
+        	tempData[i].mag = d["mag"];
+        })
+
+        var clusterData = kmeans(tempData, k);
+        var color = d3.scale.category20();
+
+
+        var point = g.selectAll(".point")
+            .each(function(p, i) {
+            	d3.select(this).style("fill", color(clusterData[i]));
+            });
     };
 
     //Zoom and panning method

@@ -15,12 +15,9 @@
 
 		//Used to extract dimension names for multidimensional datasets
 		var keys = d3.keys(data[0]).filter(function(dim) {
-            if(dim != "id" && dim != "place" && dim != "time")
             return (d3.scale.linear().domain(d3.extent(data, function(p) { 
            		return +p[dim];
             })));
-        else
-        	return false;
         });
 		//holds lists containg lines closest to current k
 		var trackList = [];
@@ -50,7 +47,6 @@
 		
 		//Store quality measure from last iteration
 		var lastQualityMeasure = null;
-		console.log(kList);
 		//TEST : DO 15 TIMES MAX, this is aborted if quality is sufficient
 		for (var l = 0; l < 15; l++) {
 
